@@ -1,16 +1,15 @@
+import { useId, useState } from "react";
+import { CSS } from "@dnd-kit/utilities";
 import { Location } from "@/app/generated/prisma";
-import { reorderItinerary } from "@/lib/actions/reorder-itineraty";
 import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
+import { reorderItinerary } from "@/lib/reorder-itinerary";
 import {
   arrayMove,
   SortableContext,
   verticalListSortingStrategy,
   useSortable,
 } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { useId, useState } from "react";
-
-interface SortableItineraryProps {
+interface SortableItneraryProps {
   locations: Location[];
   tripId: string;
 }
@@ -18,7 +17,6 @@ interface SortableItineraryProps {
 function SortableItem({ item }: { item: Location }) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: item.id });
-
   return (
     <div
       ref={setNodeRef}
@@ -28,13 +26,9 @@ function SortableItem({ item }: { item: Location }) {
       className="p-4 border rounded-md flex justify-between items-center hover:shadow transition-shadow"
     >
       <div>
-        <h4 className="font-medium text-gray-800"> {item.locationTitle}</h4>
-        <p className="text-sm text-gray-500 truncate max-w-xs">
-          {" "}
-          {`Latitude: ${item.lat}, Longitude: ${item.lng}`}
-        </p>
+        <h4>{item.locationTitle}</h4>
       </div>
-      <div className="text-sm text-gray-600"> Day {item.order}</div>
+      <div className="text-sm text-gray-600"> Day {item.order} </div>
     </div>
   );
 }
@@ -42,10 +36,9 @@ function SortableItem({ item }: { item: Location }) {
 export default function SortableItinerary({
   locations,
   tripId,
-}: SortableItineraryProps) {
+}: SortableItneraryProps) {
   const id = useId();
-  const [localLocation, setLocalLocation] = useState(locations);
-
+  const [localLocation, setLocalLcoation] = useState(locations);
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -58,8 +51,7 @@ export default function SortableItinerary({
         oldIndex,
         newIndex
       ).map((item, index) => ({ ...item, order: index }));
-
-      setLocalLocation(newLocationsOrder);
+      setLocalLcoation(newLocationsOrder);
 
       await reorderItinerary(
         tripId,
@@ -67,7 +59,6 @@ export default function SortableItinerary({
       );
     }
   };
-
   return (
     <DndContext
       id={id}

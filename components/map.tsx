@@ -1,36 +1,62 @@
 "use client";
+import "leaflet/dist/leaflet.css";
+import { Location as PrismaLocation } from "@/app/generated/prisma";
+import { MapContainer, TileLayer, useMap, Marker, Popup } from "react-leaflet";
+import { useEffect, useState } from "react";
+import L from "leaflet";
 
-import { Location } from "@/app/generated/prisma";
-import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
+// @ts-expect-error ddd
+delete L.Icon.Default.prototype._getIconUrl;
 
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "/leaflet/marker-icon.png",
+  iconUrl: "/leaflet/marker-icon.png",
+  shadowUrl: "/leaflet/marker-shadow.png",
+});
 interface MapProps {
-  itineraries: Location[];
+  iteneraries: PrismaLocation[];
 }
+export default function Map({ iteneraries }: MapProps) {
+  const [mounted, setMounted] = useState(false);
 
-export default function Map({ itineraries }: MapProps) {
-  const { isLoaded, loadError } = useLoadScript({
-    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
-  });
-  if (loadError) return <div> Error loading maps</div>;
-  if (!isLoaded) return <div> Loading maps...</div>;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  const center =
-    itineraries.length > 0
-      ? { lat: itineraries[0].lat, lng: itineraries[0].lng }
-      : { lat: 0, lng: 0 };
+  if (!mounted) {
+    return <div style={{ height: "400px" }}>Loading map...</div>;
+  }
+
+  function FitBounds({ iteneraries }: { iteneraries: PrismaLocation[] }) {
+    const map = useMap();
+
+    useEffect(() => {
+      if (iteneraries.length > 0) {
+        const bounds = iteneraries.map((loc) => [loc.lat, loc.lng]) as [
+          number,
+          number
+        ][];
+        map.fitBounds(bounds);
+      }
+    }, [iteneraries, map]);
+
+    return null;
+  }
   return (
-    <GoogleMap
-      mapContainerStyle={{ width: "100%", height: "100%" }}
-      zoom={8}
-      center={center}
-    >
-      {itineraries.map((location, key) => (
-        <Marker
-          key={key}
-          position={{ lat: location.lat, lng: location.lng }}
-          title={location.locationTitle}
+    <div id="map" style={{ height: "400px", width: "100%" }}>
+      <MapContainer center={[0, 0]} zoom={2} scrollWheelZoom={true}>
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-      ))}
-    </GoogleMap>
+
+        {iteneraries.map((loc) => (
+          <Marker key={loc.id} position={[loc.lat, loc.lng]}>
+            <Popup>{loc.locationTitle}</Popup>
+          </Marker>
+        ))}
+        <FitBounds iteneraries={iteneraries} />
+      </MapContainer>
+    </div>
   );
 }

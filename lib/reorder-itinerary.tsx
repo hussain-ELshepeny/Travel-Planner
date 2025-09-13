@@ -1,13 +1,11 @@
 "use server";
 
 import { auth } from "@/auth";
-import { prisma } from "../prisma";
+import { prisma } from "./prisma";
 
 export async function reorderItinerary(tripId: string, newOrder: string[]) {
   const session = await auth();
-  if (!session) {
-    throw new Error("Not authenticated");
-  }
+  if (!session) throw new Error("Not Authenticated");
 
   await prisma.$transaction(
     newOrder.map((locationId: string, key: number) =>

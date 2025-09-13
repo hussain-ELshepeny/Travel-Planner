@@ -1,5 +1,4 @@
 import NewLocationClient from "@/components/new-location";
-
 export default async function NewLocation({
   params,
 }: {

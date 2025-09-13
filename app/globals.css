@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "uploadthing/tw/v4";
 @source "../node_modules/@uploadthing/react/dist"; /** <-- depends on your project structure */
+@import "leaflet/dist/leaflet.css";
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -71,4 +72,15 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+@layer utilities {
+  .decent-flex {
+    @apply flex items-center justify-center;
+  }
+}
+
+.leaflet-container {
+  height: 400px;
+  width: 100%;
+   z-index: 1;
 }
